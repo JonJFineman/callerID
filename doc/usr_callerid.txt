@@ -1,0 +1,72 @@
+at#cid=1
+OK
+
+RING
+
+DATE=1003
+TIME=1840
+NAME=NEW YORK CALL
+NMBR=2125551212
+
+RING
+
+RING
+
+
+
+ Tag Description
+
+DATE DATE = MMDD where MM is the month number (01 to 12) and DD is the day number (01..31).
+
+TIME TIME = HHMM where HH is the hour number (00 to 23) and MM is the minute number (00 to 59).
+
+NMBR NMBR = <number> or P or O where <number> is the telephone number of the caller, where P indicates that the calling number information is not available since the originating caller has requested private service, and where O indicates that the calling number information is not available or out of service at the calling location.
+
+NAME NAME = <listing name> where <listing name> is the subscription name.
+
+MESG MESG = <data tag> <length of message> <data> <checksum> in printable ASCII hex numbers. This tag indicates a data item not listed above. The message is only possible for Multiple Message Format.
+
+Notes:
+
+1. The modem does not present any Caller ID information if the DCE detects a checksum error in the Caller ID packet.
+
+2. In the event of an unrecognized data tag, the modem will present the data in ASCII hex numbers following the MESG tag.
+
+Example of Formatted Form Reporting
+1. The following example illustrates the standard Caller ID message packet.
+
+RING
+
+DATE = 0321
+TIME = 1405
+NMBR = 5045551234
+NAME = A N OTHER
+
+RING
+
+RING
+
+2. The following example illustrates the case where the tag of the packet is not recognized by the modem.
+
+RING
+
+MESG = 060342424231
+
+RING
+
+RING
+
+Unformatted Form Reporting
+The modem presents all information and packet control information found in the message. The modem, however, excludes the leading U's (channel seizure information) from the presentation. The packet is presented in ASCII printable hex numbers, the modem does not insert spaces, or line feeds, for formatting between bytes or words of the packet.
+
+The modem does not detect the checksum of the packet.
+
+Example of Unformatted Form Reporting
+RING
+
+0412303332323234303539313435353132333435
+
+RING
+
+RING 
+

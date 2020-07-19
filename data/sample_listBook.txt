@@ -1,0 +1,3 @@
+NMBR=8005551213;NAME=Sample Name
+NMBR=8005551212;NAME=Sample Business
+NMBR=411;NAME=Directory Assistance

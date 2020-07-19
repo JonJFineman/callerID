@@ -1,0 +1,14 @@
+# silent list i.e don't anounce
+# start is wildcard
+NMBR=*;NAME=NOVA SCOTI CALL
+NMBR=*;NAME=TEXAS CALL
+NMBR=*;NAME=WASH DC CALL
+NMBR=*;NAME=IDAHO CALL
+
+NMBR=*;NAME=name not provided
+NMBR=*;NAME=not provided
+NMBR=*;NAME=o
+NMBR=*;NAME=not in service
+NMBR=*;NAME=unknown name
+NMBR=unknown number;NAME=*
+NMBR=unknown number;NAME=Unknown Name
