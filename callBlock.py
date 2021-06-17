@@ -7,6 +7,7 @@ import argparse
 from vallidatePhoneNumber import validateNumber
 from parseCallerID import parseCallerID
 from announceCall import *
+from launchMail import *
 
 
 
@@ -21,6 +22,7 @@ parser.add_argument('--device', required=False, default='004', help='modem devic
 parser.add_argument('--book', required=False, default='data/listBook.txt', help='addr book')
 parser.add_argument('--silent', required=False, default='data/listSilent.txt', help='silent book')
 parser.add_argument('--block', required=False, default='data/listBlock.txt', help='block book')
+parser.add_argument('--email', required=True, help='notify email')
 parser.add_argument('--log', required=False, default='logs/callerID.log', help='log file')
 
 args = parser.parse_args()
@@ -30,6 +32,7 @@ print(  args.port, '\n', \
         args.book, '\n', \
         args.silent, '\n', \
         args.block, '\n', \
+        args.email, '\n', \
         args.log )
 
 
@@ -39,6 +42,7 @@ print(  args.port, '\n', \
 modemPort = args.port
 modemBus = args.bus
 modemDevice = args.device
+emailID = args.email
 modemUSBDevice = '/dev/bus/usb/' + modemBus + '/' + modemDevice
 # MODEM commands
 mInit = 'ATZ'
@@ -198,6 +202,19 @@ def cleanUpModemResponse(line):
         
         
         
+def cleanName(name):
+    hold = name
+
+    if hold[:3].lower() == '[v]':
+        hold = hold[3:]
+
+    hold = re.sub(' +', ' ', hold)
+    hold = hold.strip()
+
+    return(hold)
+
+
+
 def readPhoneBook():
     fd = open(LIST_BOOK, 'r')
     lines = fd.readlines()
@@ -211,6 +228,7 @@ def readPhoneBook():
         entry =  line.split(';')
         number = entry[0].split('=')
         name   = entry[1].split('=')
+        name[1]   = cleanName(name[1])
         newEntry = number[1].lower() + ':' + name[1].lower()
         phoneList.append(newEntry)
         
@@ -231,6 +249,7 @@ def readSilentList():
         entry =  line.split(';')
         number = entry[0].split('=')
         name   = entry[1].split('=')
+        name[1]   = cleanName(name[1])
         newEntry = number[1].lower() + ':' + name[1].lower()
         phoneList.append(newEntry)
         
@@ -251,6 +270,7 @@ def readBlockList():
         entry =  line.split(';')
         number = entry[0].split('=')
         name   = entry[1].split('=')
+        name[1]   = cleanName(name[1])
         newEntry = number[1].lower() + ':' + name[1].lower()
         phoneList.append(newEntry)
         
@@ -288,6 +308,11 @@ def checkSilentList(number, name, book):
     #    n = i.split(':')
     #    if name == n[1] and '*' == n[0]:
     #        return(True)
+    for i in book:
+        n = i.split(':')
+        if name == n[1] and '*' == n[0]:
+            log.debug('checkSilentList for {}, found: {}, {}'.format(name, n[0], n[1]))
+            return([True, n[0], n[1]])
 
     log.debug('checkSilentList no match: {}, {}'.format(number, name))
     return([False,'',''] )
@@ -307,6 +332,10 @@ def checkBlockList(number, name, book):
         if name == n[1] and '*' == n[0]:
             log.debug('checkBlockList for {}, found: {}, {}'.format(name, n[0], n[1]))
             return([True, n[0], n[1]])
+        elif name == n[1] and number[:3] == n[0]:
+            log.debug('checkBlockList exchange for {}, found: {}, {}'.format(name, n[0], n[1]))
+            return([True, n[0], n[1]])
+
 
     log.debug('checkBlockList no match: {}, {}'.format(number, name))
     return([False,'',''] )
@@ -423,6 +452,7 @@ def main(argv):
         
         if ret[1] == 'name':
             mName = ret[2].lower()
+            mName = cleanName(mName)
             gotName = True
             log.info('incoming name: {}'.format(mName))
             #continue
@@ -478,6 +508,9 @@ def main(argv):
                 announceCallerESpeak(mNumber, listName)
                 bell = True
                 nameInBook = True
+                ### send email
+                subj = 'caller id: ' + str(listName) + ' ' + str(mNumber)
+                mail_send(emailID, emailID, subj, '')
                 continue
 
             #
@@ -518,6 +551,7 @@ def main(argv):
             # jjf announceCallerFestival(mNumber, listName)
             announceCallerESpeak(mNumber, mName)
             bell = True
+            ### send email
             log.info('incoming call, ringing bell')
             # jjf ringBell(nameInBook)
         
